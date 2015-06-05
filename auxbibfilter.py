@@ -11,10 +11,13 @@ def parse_aux_citekeys(filename):
     citekeys = {}
     with open(filename, 'r') as f:
         for line in f:
-            m = re.match(r'\\citation\{(.+)\}', line)
+            m = re.match(r'\\citation\{(.+)\}|\\abx@aux@cite\{(.+)\}', line)
             if not m:
                 continue
-            for citekey in [x.strip() for x in m.group(1).split(',')]:
+            allkeys = [x.strip() for x in
+                       (s for s in m.groups()
+                        if s is not None).next().split(',')]
+            for citekey in allkeys:
                 if citekey not in blacklist:
                     citekeys[citekey] = None
     return citekeys.keys()
