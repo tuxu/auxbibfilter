@@ -7,20 +7,17 @@ import re
 def parse_aux_citekeys(filename):
     """ Parse the LaTeX aux file for BibTeX citations and return their keys.
     """
-    blacklist = ['REVTEX41Control', 'aip41Control']
-    citekeys = {}
+    blacklist = {'REVTEX41Control', 'aip41Control'}
+    citekeys = set()
     with open(filename, 'r') as f:
         for line in f:
             m = re.match(r'\\citation\{(.+)\}|\\abx@aux@cite\{(.+)\}', line)
             if not m:
                 continue
-            allkeys = [x.strip() for x in
-                       (s for s in m.groups()
-                        if s is not None).next().split(',')]
-            for citekey in allkeys:
-                if citekey not in blacklist:
-                    citekeys[citekey] = None
-    return citekeys.keys()
+            keys = [x.strip() for x in
+                    (s for s in m.groups() if s is not None).next().split(',')]
+            citekeys |= set(keys)
+    return list(citekeys - blacklist)
 
 class BibTeX(object):
     """ Dumb BibTeX parser using regular expressions. """ 
